@@ -3,44 +3,51 @@ import dhlab.nbtext as nb
 import pandas as pd
 
 @st.cache(suppress_st_warning=True)
-def ngram(word, ddk, subject, period):
+def ngram(word, period):
     if " " in word:
         bigram = word.split()[:2]
-        res = nb.bigram(first = bigram [0], second = bigram [1], ddk = ddk, topic = subject, period = period)
+        res = nb.bigram(first = bigram [0], second = bigram [1], period = period)
     else:
-        res = nb.unigram(word, ddk = ddk, topic = subject, period = period)
+        res = nb.unigram(word, period = period)
     return res
 
 @st.cache(suppress_st_warning=True)
-def sumword(words, ddk, topic, period):
+def sumword(words, period):
     wordlist =   [x.strip() for x in words.split(',')]
-    ref = pd.concat([nb.unigram(w, ddk = ddk, topic = topic, period = period) for w in wordlist], axis = 1).sum(axis = 1)
+    ref = pd.concat([nb.unigram(w, period = period) for w in wordlist], axis = 1).sum(axis = 1)
     ref.columns = ["tot"]
     return ref
 
+
+@st.cache(suppress_st_warning = True)
+def wildcard(word = 'frum*', faktor = 2, frekvens = 50, antall = 50):
+    res = nb.sorted_wildcardsearch(
+        {
+            'word': word,   # her legges selve søkeordet inn
+            'factor': faktor,           # factor bestemmer hvor mye lenger treffene skal være enn ordet med jokertegn.
+            'freq_lim':frekvens,        # sett begrensninger på frekvensen, minimumsverdi
+            'limit':antall            # begrensning på antall treff
+
+        })
+    return res
+
+
+
+
 st.title('Ord og bigram')
 
-words = st.sidebar.text_input('Fyll inn ord og bigram adskilt med komma', "")
-if words == "":
-    words = "det"
+words = st.sidebar.text_input('Fyll inn ord med * her og der', "")
+if word == "":
+    word = "frum"
 
-sammenlign = st.sidebar.text_input("Sammenling med summen av følgende ord", ".")
+frekvens = st.sidebar.number_input('frekvensgrense', 50)
+faktor = st.sidebar.number_input('forskjell i ordlengde', 3)
+limit = st.sidebar.number_input('antall treff', 50)
+
+
+sammenlign = st.sidebar.text_input("Relativiser til summen av følgende token", ".")
  
 allword = [w.strip() for w in words.split(',')]
-
-    
-ddk = st.sidebar.text_input('Dewey desimalkode', "")
-if ddk == "":
-    ddk = None
-
-if ddk != None and not ddk.endswith("%"):
-    ddk = ddk + "%"
-
-
-subject = st.sidebar.text_input('Temaord fra metadata', '')
-if subject == '':
-    subject = None
-    
 
 period_slider = st.sidebar.slider(
     'Angi periode',
@@ -48,10 +55,10 @@ period_slider = st.sidebar.slider(
 )
 
 
-
 smooth_slider = st.sidebar.slider('Glatting', 0, 8, 3)
 
-df = pd.concat([nb.frame(ngram(word, ddk = ddk, subject = subject, period = (period_slider[0], period_slider[1])), word) for word in allword], axis=1)
+resultat = wildcard(word = word, faktor = faktor, frekvens = frekvens, antall = limit)
+df = pd.concat([nb.frame(nb.unigram(x), x) for x in resultat.index], axis = 1)
 
 df = df.rolling(window= smooth_slider).mean()
 
