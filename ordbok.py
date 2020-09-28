@@ -34,20 +34,16 @@ def wildcard(word = 'frum*', faktor = 2, frekvens = 50, antall = 50):
 
 
 
-st.title('Ord og bigram')
+st.title('Ordsøk for revisjonsprosjektet')
 
-words = st.sidebar.text_input('Fyll inn ord med * her og der', "")
-if word == "":
-    word = "frum"
+word = st.sidebar.text_input('Fyll inn ord med * her og der', "frum")
 
-frekvens = st.sidebar.number_input('frekvensgrense', 50)
-faktor = st.sidebar.number_input('forskjell i ordlengde', 3)
-limit = st.sidebar.number_input('antall treff', 50)
+faktor = st.sidebar.number_input('forskjell i ordlengde', min_value = 0, value = 2)
+frekvens = st.sidebar.number_input('frekvensgrense', min_value = 1, value = 50)
+limit = st.sidebar.number_input('antall treff', min_value = 5, value = 10)
 
 
 sammenlign = st.sidebar.text_input("Relativiser til summen av følgende token", ".")
- 
-allword = [w.strip() for w in words.split(',')]
 
 period_slider = st.sidebar.slider(
     'Angi periode',
@@ -58,17 +54,19 @@ period_slider = st.sidebar.slider(
 smooth_slider = st.sidebar.slider('Glatting', 0, 8, 3)
 
 resultat = wildcard(word = word, faktor = faktor, frekvens = frekvens, antall = limit)
+
 df = pd.concat([nb.frame(nb.unigram(x), x) for x in resultat.index], axis = 1)
 
 df = df.rolling(window= smooth_slider).mean()
 
 # Råfrekvenser unigram
 if sammenlign != "":
-    tot = sumword(sammenlign, ddk, subject, period=(period_slider[0], period_slider[1]))
+    tot = sumword(sammenlign, period=(period_slider[0], period_slider[1]))
     for x in df:
         df[x] = df[x]/tot
         
 df.index = pd.to_datetime(df.index, format='%Y')
 st.line_chart(df)
 
-#st.line_chart(tot)
+st.write(resultat)
+
