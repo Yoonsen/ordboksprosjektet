@@ -3,7 +3,7 @@ import dhlab.nbtext as nb
 import pandas as pd
 
 @st.cache(suppress_st_warning=True)
-def ngram(word, period):
+def ngram(wordex, period):
     if " " in word:
         bigram = word.split()[:2]
         res = nb.bigram(first = bigram [0], second = bigram [1], period = period)
@@ -12,9 +12,9 @@ def ngram(word, period):
     return res
 
 @st.cache(suppress_st_warning=True)
-def sumword(words, period):
+def sumword(words, period, media = 'bok'):
     wordlist =   [x.strip() for x in words.split(',')]
-    ref = pd.concat([nb.unigram(w, period = period) for w in wordlist], axis = 1).sum(axis = 1)
+    ref = pd.concat([nb.unigram(w, media = media, period = period) for w in wordlist], axis = 1).sum(axis = 1)
     ref.columns = ["tot"]
     return ref
 
@@ -31,20 +31,37 @@ def wildcard(word = 'frum*', faktor = 2, frekvens = 50, antall = 50):
         })
     return res
 
-@st.cache(suppress_st_warning = True)
-def ng(x, period):
-    return nb.frame(nb.unigram(x, period), x)
 
+@st.cache(suppress_st_warning = True)
+def ngbok(x, period):
+    try:
+        r = nb.frame(nb.unigram(x, period, media='bok'), x)
+    except:
+        r = pd.DataFrame()
+    return r
+
+@st.cache(suppress_st_warning = True)
+def ngavis(x, period):
+    try:
+        r = nb.frame(nb.unigram(x, period, media='avis'), x)
+    except:
+        r = pd.DataFrame()
+    return r
 # App code
 
 
 st.title('Ordsøk for revisjonsprosjektet')
 
-word = st.sidebar.text_input('Fyll inn et ord med jokertegnet * her og der', "frum*")
+word = st.sidebar.text_input('Ett ord med jokertegnet *, eller flere ord skilt med komma', "frum*")
 
-faktor = st.sidebar.number_input('forskjell i ordlengde', min_value = 0, value = 2)
-frekvens = st.sidebar.number_input('frekvensgrense', min_value = 1, value = 50)
-limit = st.sidebar.number_input('antall treff', min_value = 5, value = 10)
+faktor = st.sidebar.number_input('Forskjell i ordlengde', min_value = 0, value = 2)
+frekvens = st.sidebar.number_input('Frekvensgrense', min_value = 1, value = 50)
+limit = st.sidebar.number_input('Antall treff', min_value = 5, value = 10)
+
+if ',' in word:
+    resultat = pd.DataFrame([w.strip() for w in word.split(',')]).set_index(0)
+else:
+    resultat = wildcard(word = word, faktor = faktor, frekvens = frekvens, antall = limit)
 
 
 sammenlign = st.sidebar.text_input("Relativiser til summen av følgende token", ".")
@@ -57,20 +74,39 @@ period_slider = st.sidebar.slider(
 
 smooth_slider = st.sidebar.slider('Glatting', 0, 8, 3)
 
-resultat = wildcard(word = word, faktor = faktor, frekvens = frekvens, antall = limit)
 
-df = pd.concat([ng(x, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1)
 
-df = df.rolling(window= smooth_slider).mean()
+dfb = pd.concat([ngbok(x, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1)
+dfa = pd.concat([ngavis(x, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1)
+
+dfb = dfb.rolling(window= smooth_slider).mean()
+dfa = dfa.rolling(window= smooth_slider).mean()
 
 # Råfrekvenser unigram
 if sammenlign != "":
-    tot = sumword(sammenlign, period=(period_slider[0], period_slider[1]))
-    for x in df:
-        df[x] = df[x]/tot
-        
-df.index = pd.to_datetime(df.index, format='%Y')
-st.line_chart(df)
+    totb = sumword(sammenlign, period=(period_slider[0], period_slider[1]))
+    tota = sumword(sammenlign, media = 'avis', period=(period_slider[0], period_slider[1]))
+    for x in dfb:
+        dfb[x] = dfb[x]/totb
+    for x in dfa:
+        dfa[x] = dfb[x]/tota
 
+dfb.index = pd.to_datetime(dfb.index, format='%Y')
+dfa.index = pd.to_datetime(dfa.index, format='%Y')
+
+# draw the trendlines
+st.header('Trendlinjer totalt for bøker')
+st.line_chart(dfb)
+
+st.header('Trendlinjer totalt for aviser')
+st.line_chart(dfa)
+
+
+# draw frequencies - will use them to select afterwards
+st.header('Frekvenser')
 st.write(resultat)
 
+# show concordances
+st.header('Konkordanser')
+konk_ord = st.text_input('konkordansord', list(resultat.index)[0])
+st.write(nb.concordance(konk_ord, corpus='bok', yearfrom = period_slider[0], yearto = period_slider[1], kind='panda'))
