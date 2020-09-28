@@ -1,7 +1,7 @@
 import streamlit as st
 import dhlab.nbtext as nb
 import pandas as pd
-from PIL import Image
+from Pillow import Image
 
 @st.cache(suppress_st_warning=True)
 def ngram(wordex, period):
