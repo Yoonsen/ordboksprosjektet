@@ -1,5 +1,5 @@
 {
-  "name": "Ordbok",
+  "name": "ordboksprosjektet",
   "description": "konkordans og ngram mot api.nb.no/ngram",
   "repository": "https://github.com/Yoonsen/ordboksprosjektet",
   "keywords": ["trend", "concordance", "collocation"]
