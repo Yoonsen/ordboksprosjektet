@@ -31,8 +31,9 @@ def wildcard(word = 'frum*', faktor = 2, frekvens = 50, antall = 50):
         })
     return res
 
-
-
+@st.cache(suppress_st_warning = True)
+def ng(x, period):
+    return nb.frame(nb.unigram(x, period), x)
 
 st.title('Ordsøk for revisjonsprosjektet')
 
@@ -55,7 +56,7 @@ smooth_slider = st.sidebar.slider('Glatting', 0, 8, 3)
 
 resultat = wildcard(word = word, faktor = faktor, frekvens = frekvens, antall = limit)
 
-df = pd.concat([nb.frame(nb.unigram(x), x) for x in resultat.index], axis = 1)
+df = pd.concat([ng(x, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1)
 
 df = df.rolling(window= smooth_slider).mean()
 
