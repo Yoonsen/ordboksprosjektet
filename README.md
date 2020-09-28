@@ -1,3 +1,3 @@
-# ngram
+# Ordbok  
 
-For deploying NB DHlab
+Deploying NB API
