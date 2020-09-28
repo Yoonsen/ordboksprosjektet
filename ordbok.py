@@ -36,7 +36,7 @@ def wildcard(word = 'frum*', faktor = 2, frekvens = 50, antall = 50):
 
 st.title('Ordsøk for revisjonsprosjektet')
 
-word = st.sidebar.text_input('Fyll inn ord med * her og der', "frum")
+word = st.sidebar.text_input('Fyll inn et ord med jokertegnet * her og der', "frum*")
 
 faktor = st.sidebar.number_input('forskjell i ordlengde', min_value = 0, value = 2)
 frekvens = st.sidebar.number_input('frekvensgrense', min_value = 1, value = 50)
