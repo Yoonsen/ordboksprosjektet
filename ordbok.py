@@ -35,6 +35,9 @@ def wildcard(word = 'frum*', faktor = 2, frekvens = 50, antall = 50):
 def ng(x, period):
     return nb.frame(nb.unigram(x, period), x)
 
+# App code
+
+
 st.title('Ordsøk for revisjonsprosjektet')
 
 word = st.sidebar.text_input('Fyll inn et ord med jokertegnet * her og der', "frum*")
