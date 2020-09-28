@@ -11,3 +11,4 @@ networkx
 wordcloud
 community
 python-louvain
+PIL

@@ -1,6 +1,7 @@
 import streamlit as st
 import dhlab.nbtext as nb
 import pandas as pd
+from PIL import Image
 
 @st.cache(suppress_st_warning=True)
 def ngram(wordex, period):
@@ -47,9 +48,11 @@ def ngavis(x, period):
     except:
         r = pd.DataFrame()
     return r
+
 # App code
 
-
+image = Image.open('NB-logo-no-eng-svart.png')
+st.image(image, width = 200)
 st.title('Ordsøk for revisjonsprosjektet')
 
 word = st.sidebar.text_input('Ett ord med jokertegnet *, eller flere ord skilt med komma', "frum*")
@@ -58,8 +61,11 @@ faktor = st.sidebar.number_input('Forskjell i ordlengde', min_value = 0, value =
 frekvens = st.sidebar.number_input('Frekvensgrense', min_value = 1, value = 50)
 limit = st.sidebar.number_input('Antall treff', min_value = 5, value = 10)
 
-if ',' in word:
+using_wildcard = True
+
+if ',' in word and not '*' in word:
     resultat = pd.DataFrame([w.strip() for w in word.split(',')]).set_index(0)
+    using_wildcard = False
 else:
     resultat = wildcard(word = word, faktor = faktor, frekvens = frekvens, antall = limit)
 
@@ -78,6 +84,12 @@ smooth_slider = st.sidebar.slider('Glatting', 0, 8, 3)
 
 dfb = pd.concat([ngbok(x, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1)
 dfa = pd.concat([ngavis(x, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1)
+
+# update result
+# if not using wildcard
+
+if not using_wildcard:
+    resultat = dfb.sum(axis=0).transpose()
 
 dfb = dfb.rolling(window= smooth_slider).mean()
 dfa = dfa.rolling(window= smooth_slider).mean()
@@ -106,7 +118,16 @@ st.line_chart(dfa)
 st.header('Frekvenser')
 st.write(resultat)
 
+
+#words_to_print = [w for w in resultat.index]
+
+#check_boxes = [st.checkbox(word_to_print, key = word_to_print) for word_to_print in words_to_print]
+
+#st.write([w for w, checked in zip(words_to_print, check_boxes) if checked])
+
+
+
 # show concordances
 st.header('Konkordanser')
 konk_ord = st.text_input('konkordansord', list(resultat.index)[0])
-st.write(nb.concordance(konk_ord, corpus='bok', yearfrom = period_slider[0], yearto = period_slider[1], kind='panda'))
+st.write(nb.concordance(konk_ord, corpus='bok', yearfrom = period_slider[0], yearto = period_slider[1], size = 20, kind='panda'))
