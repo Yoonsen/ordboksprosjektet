@@ -89,8 +89,11 @@ dfa = pd.concat([ngavis(x, period=(period_slider[0], period_slider[1]))  for x i
 # if not using wildcard
 
 if not using_wildcard:
-    resultat = dfb.sum(axis=0).transpose()
-
+    r0 = dfb.sum(axis=0).transpose()
+    r1 = dfa.sum(axis = 0).transpose()
+    resultat = pd.concat([r0, r1], axis = 1)
+    resultat.columns = ['bok', 'avis']
+    
 dfb = dfb.rolling(window= smooth_slider).mean()
 dfa = dfa.rolling(window= smooth_slider).mean()
 
