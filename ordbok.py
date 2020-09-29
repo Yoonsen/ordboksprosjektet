@@ -94,8 +94,7 @@ if not using_wildcard:
     resultat = pd.concat([r0, r1], axis = 1)
     resultat.columns = ['bok', 'avis']
     
-dfb = dfb.rolling(window= smooth_slider).mean()
-dfa = dfa.rolling(window= smooth_slider).mean()
+
 
 # Råfrekvenser unigram
 if sammenlign != "":
@@ -104,10 +103,15 @@ if sammenlign != "":
     for x in dfb:
         dfb[x] = dfb[x]/totb
     for x in dfa:
-        dfa[x] = dfb[x]/tota
+        dfa[x] = dfa[x]/tota
 
+        
 dfb.index = pd.to_datetime(dfb.index, format='%Y')
 dfa.index = pd.to_datetime(dfa.index, format='%Y')
+
+
+dfb = dfb.rolling(window= smooth_slider).mean()
+dfa = dfa.rolling(window= smooth_slider).mean()
 
 # draw the trendlines
 st.header('Trendlinjer totalt for bøker')
