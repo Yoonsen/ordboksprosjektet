@@ -15,6 +15,9 @@ def ngram(wordex, period):
 @st.cache(suppress_st_warning=True, show_spinner = False)
 def sumword(words, period, media = 'bok'):
     wordlist =   [x.strip() for x in words.split(',')]
+    # check if trailing comma, or comma in succession, if so count comma in
+    if '' in wordlist:
+        wordlist = [','] + [y for y in wordlist if y != '']
     ref = pd.concat([nb.unigram(w, media = media, period = period) for w in wordlist], axis = 1).sum(axis = 1)
     ref.columns = ["tot"]
     return ref
@@ -64,13 +67,16 @@ limit = st.sidebar.number_input('Antall treff', min_value = 5, value = 10)
 using_wildcard = True
 
 if ',' in word and not '*' in word:
-    resultat = pd.DataFrame([w.strip() for w in word.split(',')]).set_index(0)
+    words = [w.strip() for w in word.split(',')]
+    if '' in words:
+        words = [','] + [y for y in words if y != '']
+    resultat = pd.DataFrame(words).set_index(0)
     using_wildcard = False
 else:
     resultat = wildcard(word = word, faktor = faktor, frekvens = frekvens, antall = limit)
 
 
-sammenlign = st.sidebar.text_input("Relativiser til summen av følgende token", ".")
+sammenlign = st.sidebar.text_input("Relativiser til summen av følgende token", ".,")
 
 period_slider = st.sidebar.slider(
     'Angi periode',
