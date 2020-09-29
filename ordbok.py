@@ -3,7 +3,7 @@ import dhlab.nbtext as nb
 import pandas as pd
 from PIL import Image
 
-@st.cache(suppress_st_warning=True)
+@st.cache(suppress_st_warning=True, show_spinner = False)
 def ngram(wordex, period):
     if " " in word:
         bigram = word.split()[:2]
@@ -12,7 +12,7 @@ def ngram(wordex, period):
         res = nb.unigram(word, period = period)
     return res
 
-@st.cache(suppress_st_warning=True)
+@st.cache(suppress_st_warning=True, show_spinner = False)
 def sumword(words, period, media = 'bok'):
     wordlist =   [x.strip() for x in words.split(',')]
     ref = pd.concat([nb.unigram(w, media = media, period = period) for w in wordlist], axis = 1).sum(axis = 1)
@@ -20,7 +20,7 @@ def sumword(words, period, media = 'bok'):
     return ref
 
 
-@st.cache(suppress_st_warning = True)
+@st.cache(suppress_st_warning = True, show_spinner = False)
 def wildcard(word = 'frum*', faktor = 2, frekvens = 50, antall = 50):
     res = nb.sorted_wildcardsearch(
         {
@@ -33,7 +33,7 @@ def wildcard(word = 'frum*', faktor = 2, frekvens = 50, antall = 50):
     return res
 
 
-@st.cache(suppress_st_warning = True)
+@st.cache(suppress_st_warning = True, show_spinner = False)
 def ngbok(x, period):
     try:
         r = nb.frame(nb.unigram(x, period, media='bok'), x)
@@ -41,7 +41,7 @@ def ngbok(x, period):
         r = pd.DataFrame()
     return r
 
-@st.cache(suppress_st_warning = True)
+@st.cache(suppress_st_warning = True, show_spinner = False)
 def ngavis(x, period):
     try:
         r = nb.frame(nb.unigram(x, period, media='avis'), x)
