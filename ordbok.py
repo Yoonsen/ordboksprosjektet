@@ -120,10 +120,11 @@ dfb = dfb.rolling(window= smooth_slider).mean()
 dfa = dfa.rolling(window= smooth_slider).mean()
 
 # draw the trendlines
-st.header('Trendlinjer totalt for bøker')
+st.header('Trendlinjer')
+st.subheader('Bøker')
 st.line_chart(dfb)
 
-st.header('Trendlinjer totalt for aviser')
+st.subheader('Aviser')
 st.line_chart(dfa)
 
 
