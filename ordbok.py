@@ -133,7 +133,8 @@ st.write(resultat)
 # show concordances
 st.header('Konkordanser')
 konk_ord = st.text_input('konkordanseord', list(resultat.index)[0])
-konks = nb.concordance(konk_ord, corpus='bok', yearfrom = period_slider[0], yearto = period_slider[1], size = 20, kind='json')
+#media_type = st.radio('Mediatype', ['bok', 'avis'])
+konks = nb.concordance(konk_ord, corpus= 'bok', yearfrom = period_slider[0], yearto = period_slider[1], size = 20, kind='json')
 
 st.markdown('\n\n'.join([ str(j['before']) + ' _' + str(j['word']) + '_ ' + str(j['after']) \
             + ' $\\bullet$  [' + str(j['title']) + '](' + str(j['urn']) + '?searchText=' + konk_ord + '), ' + \
