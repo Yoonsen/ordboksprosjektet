@@ -56,10 +56,14 @@ def ngavis(x, period):
 
 image = Image.open('NB-logo-no-eng-svart.png')
 st.image(image, width = 200)
+st.markdown('Se mer om å drive analytisk DH på [DHLAB-siden](https://nbviewer.jupyter.org/github/DH-LAB-NB/DHLAB/blob/master/DHLAB_ved_Nasjonalbiblioteket.ipynb), og korpusanalyse via web [her](https://beta.nb.no/korpus/)')
+
+
 st.title('Ordsøk for revisjonsprosjektet')
 
-word = st.sidebar.text_input('Ett ord med jokertegnet *, eller flere ord skilt med komma', "frum*")
+word = st.text_input('Fyll in ett ord med jokertegnet *, eller flere ord skilt med komma. Søket skiller mellom store og små bo', "frum*")
 
+st.sidebar.header('Parametre for jokertegnsøk')
 faktor = st.sidebar.number_input('Forskjell i ordlengde', min_value = 0, value = 2)
 frekvens = st.sidebar.number_input('Frekvensgrense', min_value = 1, value = 50)
 limit = st.sidebar.number_input('Antall treff', min_value = 5, value = 10)
@@ -75,16 +79,20 @@ if ',' in word and not '*' in word:
 else:
     resultat = wildcard(word = word, faktor = faktor, frekvens = frekvens, antall = limit)
 
+st.sidebar.header('Relativisering')
+st.sidebar.markdown('Relativiser til summen av et sett ord, standard er punktum og komma, som gir ca en tiendedel av relativfreksensen. Sett inn ord adskilt med komma, for å få med komma, skrive to eller fler komma etter hverandre, eller avslutt med komma')
+sammenlign = st.sidebar.text_input("", ".,")
 
-sammenlign = st.sidebar.text_input("Relativiser til summen av følgende token", ".,")
-
+st.sidebar.header('Periode i år')
+st.sidebar.markdown('Se på trender fra første til siste år')
 period_slider = st.sidebar.slider(
-    'Angi periode',
+    '',
     1900, 2020, (1950, 2000)
 )
 
-
-smooth_slider = st.sidebar.slider('Glatting', 0, 8, 3)
+st.sidebar.header('Visning')
+st.sidebar.markdown('Grafen glattes til gjennomsnittsverdien av årene foran og etter, fra 1 til 8')
+smooth_slider = st.sidebar.slider('', 1, 8, 3)
 
 
 
