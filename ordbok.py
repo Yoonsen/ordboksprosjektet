@@ -150,7 +150,8 @@ axb.spines["left"].set_color("grey")
 axb.spines["bottom"].set_linewidth(3)
 axb.spines["left"].set_linewidth(3)
 
-st.pyplot()
+#st.pyplot()
+st.line_chart(dfb)
 
 st.subheader('Aviser')
 
@@ -163,7 +164,7 @@ axa.spines["left"].set_color("grey")
 axa.spines["bottom"].set_linewidth(3)
 axa.spines["left"].set_linewidth(3)
 
-st.pyplot()
+st.line_chart(dfa)
 
 
 # draw frequencies - will use them to select afterwards
