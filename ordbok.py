@@ -143,7 +143,7 @@ st.subheader('Bøker')
 
 
 
-axb = dfb.plot(figsize = (8, 4), lw = 5, alpha=0.8)
+axb = dfb.plot(figsize = (8, 4), lw = 3, alpha=0.8)
 axb.spines["top"].set_visible(False)
 axb.spines["right"].set_visible(False)
 
@@ -161,7 +161,7 @@ st.markdown(figfile.getvalue(), unsafe_allow_html=True)
 
 st.subheader('Aviser')
 
-axa = dfa.plot(figsize = (8, 4), lw = 5, alpha=0.8)
+axa = dfa.plot(figsize = (8, 4), lw = 3, alpha=0.8)
 axa.spines["top"].set_visible(False)
 axa.spines["right"].set_visible(False)
 
