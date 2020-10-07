@@ -152,12 +152,12 @@ axb.spines["left"].set_color("grey")
 axb.spines["bottom"].set_linewidth(1)
 axb.spines["left"].set_linewidth(1)
 
-figfile = StringIO()
-plt.savefig(figfile, format='svg')  # rewind to beginning of file
-
+#figfile = StringIO()
+#plt.savefig(figfile, format='svg')  # rewind to beginning of file
 #st.write(figfile.getvalue())
-#st.pyplot()
-st.markdown(figfile.getvalue(), unsafe_allow_html=True)
+#st.markdown(figfile.getvalue(), unsafe_allow_html=True)
+
+st.line_chart(dfb)
 
 st.subheader('Aviser')
 
@@ -170,11 +170,11 @@ axa.spines["left"].set_color("grey")
 axa.spines["bottom"].set_linewidth(1)
 axa.spines["left"].set_linewidth(1)
 
-figfile = StringIO()
-plt.savefig(figfile, format='svg')  # rewind to beginning of file
-st.markdown(figfile.getvalue(), unsafe_allow_html=True)
+#figfile = StringIO()
+#plt.savefig(figfile, format='svg')  # rewind to beginning of file
+#st.markdown(figfile.getvalue(), unsafe_allow_html=True)
 
-#st.line_chart(dfa)
+st.line_chart(dfa)
 
 
 # draw frequencies - will use them to select afterwards
