@@ -1,6 +1,8 @@
 import streamlit as st
 import dhlab.nbtext as nb
 import pandas as pd
+import matplotlib.pyplot as plt
+from io import StringIO, BytesIO
 from PIL import Image
 
 @st.cache(suppress_st_warning=True, show_spinner = False)
@@ -141,7 +143,7 @@ st.subheader('Bøker')
 
 
 
-axb = dfb.plot(figsize = (10,6 ), lw = 5, alpha=0.8)
+axb = dfb.plot(figsize = (8, 4), lw = 5, alpha=0.8)
 axb.spines["top"].set_visible(False)
 axb.spines["right"].set_visible(False)
 
@@ -150,12 +152,16 @@ axb.spines["left"].set_color("grey")
 axb.spines["bottom"].set_linewidth(3)
 axb.spines["left"].set_linewidth(3)
 
+figfile = StringIO()
+plt.savefig(figfile, format='svg')  # rewind to beginning of file
+
+#st.write(figfile.getvalue())
 #st.pyplot()
-st.line_chart(dfb)
+st.markdown(figfile.getvalue(), unsafe_allow_html=True)
 
 st.subheader('Aviser')
 
-axa = dfa.plot(figsize = (10,6 ), lw = 5, alpha=0.8)
+axa = dfa.plot(figsize = (8, 4), lw = 5, alpha=0.8)
 axa.spines["top"].set_visible(False)
 axa.spines["right"].set_visible(False)
 
@@ -164,7 +170,11 @@ axa.spines["left"].set_color("grey")
 axa.spines["bottom"].set_linewidth(3)
 axa.spines["left"].set_linewidth(3)
 
-st.line_chart(dfa)
+figfile = StringIO()
+plt.savefig(figfile, format='svg')  # rewind to beginning of file
+st.markdown(figfile.getvalue(), unsafe_allow_html=True)
+
+#st.line_chart(dfa)
 
 
 # draw frequencies - will use them to select afterwards
