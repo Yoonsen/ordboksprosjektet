@@ -4,12 +4,12 @@ import pandas as pd
 from PIL import Image
 
 @st.cache(suppress_st_warning=True, show_spinner = False)
-def ngram(wordex, period):
+def ngram(wordex, period, ddk = None):
     if " " in word:
         bigram = word.split()[:2]
-        res = nb.bigram(first = bigram [0], second = bigram [1], period = period)
+        res = nb.bigram(first = bigram [0], second = bigram [1], ddk=ddk, period = period)
     else:
-        res = nb.unigram(word, period = period)
+        res = nb.unigram(word, period = period, ddk=ddk)
     return res
 
 @st.cache(suppress_st_warning=True, show_spinner = False)
@@ -37,9 +37,9 @@ def wildcard(word = 'frum*', faktor = 2, frekvens = 50, antall = 50):
 
 
 @st.cache(suppress_st_warning = True, show_spinner = False)
-def ngbok(x, period):
+def ngbok(x, period, ddk = None):
     try:
-        r = nb.frame(nb.unigram(x, period, media='bok'), x)
+        r = nb.frame(nb.unigram(x, period, media='bok', ddk=ddk), x)
     except:
         r = pd.DataFrame()
     return r
@@ -61,7 +61,7 @@ st.markdown('Se mer om å drive analytisk DH på [DHLAB-siden](https://nbviewer.
 
 st.title('Ordsøk for revisjonsprosjektet')
 
-word = st.text_input('Fyll in ett ord med jokertegnet *, eller flere ord skilt med komma. Søket skiller mellom store og små bo', "frum*")
+word = st.text_input('Fyll in ett ord med jokertegnet *, eller flere ord skilt med komma. Om bare ett ord er fylt inn søkes det i paradigmet for ordet, for alle former i alle passende paradigmer. Søket skiller mellom store og små bo', "frum*")
 
 st.sidebar.header('Parametre for jokertegnsøk')
 faktor = st.sidebar.number_input('Forskjell i ordlengde', min_value = 0, value = 2)
@@ -76,6 +76,9 @@ if ',' in word and not '*' in word:
         words = [','] + [y for y in words if y != '']
     resultat = pd.DataFrame(words).set_index(0)
     using_wildcard = False
+elif not ',' in word and not '*' in word:
+    using_wildcard = False
+    resultat = pd.DataFrame(list(set([word] + [x for y in nb.word_paradigm(word) for x in y[1]]))).set_index(0) 
 else:
     resultat = wildcard(word = word, faktor = faktor, frekvens = frekvens, antall = limit)
 
@@ -102,11 +105,12 @@ dfa = pd.concat([ngavis(x, period=(period_slider[0], period_slider[1]))  for x i
 # update result
 # if not using wildcard
 
-if not using_wildcard:
-    r0 = dfb.sum(axis=0).transpose()
-    r1 = dfa.sum(axis = 0).transpose()
-    resultat = pd.concat([r0, r1], axis = 1)
-    resultat.columns = ['bok', 'avis']
+#if not using_wildcard:
+r0 = dfb.sum(axis=0).transpose()
+r1 = dfa.sum(axis = 0).transpose()
+ddk = pd.concat([ngbok(x, ddk = '4%', period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1).sum(axis = 0).transpose()
+resultat = pd.concat([r0, r1, ddk], axis = 1).fillna(0)
+resultat.columns = ['bok', 'avis', 'ddk4']
     
 
 
@@ -127,13 +131,39 @@ dfa.index = pd.to_datetime(dfa.index, format='%Y')
 dfb = dfb.rolling(window= smooth_slider).mean()
 dfa = dfa.rolling(window= smooth_slider).mean()
 
+
+
+
 # draw the trendlines
 st.header('Trendlinjer')
 st.subheader('Bøker')
-st.line_chart(dfb)
+
+
+
+
+axb = dfb.plot(figsize = (10,6 ), lw = 5, alpha=0.8)
+axb.spines["top"].set_visible(False)
+axb.spines["right"].set_visible(False)
+
+axb.spines["bottom"].set_color("grey")
+axb.spines["left"].set_color("grey")
+axb.spines["bottom"].set_linewidth(3)
+axb.spines["left"].set_linewidth(3)
+
+st.pyplot()
 
 st.subheader('Aviser')
-st.line_chart(dfa)
+
+axa = dfa.plot(figsize = (10,6 ), lw = 5, alpha=0.8)
+axa.spines["top"].set_visible(False)
+axa.spines["right"].set_visible(False)
+
+axa.spines["bottom"].set_color("grey")
+axa.spines["left"].set_color("grey")
+axa.spines["bottom"].set_linewidth(3)
+axa.spines["left"].set_linewidth(3)
+
+st.pyplot()
 
 
 # draw frequencies - will use them to select afterwards
