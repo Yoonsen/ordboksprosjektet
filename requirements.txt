@@ -1,10 +1,15 @@
 numpy
-matplotlib
 pandas==1.0.1
 dhlab==0.7.5
 streamlit==0.65.2
+matplotblib
 requests
 IPython
+seaborn
 scipy
+networkx
+wordcloud
+community
+python-louvain
 Pillow
 
