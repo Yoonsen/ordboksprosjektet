@@ -157,7 +157,8 @@ axb.spines["left"].set_linewidth(1)
 #st.write(figfile.getvalue())
 #st.markdown(figfile.getvalue(), unsafe_allow_html=True)
 
-st.line_chart(dfb)
+#st.line_chart(dfb)
+st.pyplot()
 
 st.subheader('Aviser')
 
@@ -174,8 +175,8 @@ axa.spines["left"].set_linewidth(1)
 #plt.savefig(figfile, format='svg')  # rewind to beginning of file
 #st.markdown(figfile.getvalue(), unsafe_allow_html=True)
 
-st.line_chart(dfa)
-
+#st.line_chart(dfa)
+st.pyplot()
 
 # draw frequencies - will use them to select afterwards
 st.header('Frekvenser')
