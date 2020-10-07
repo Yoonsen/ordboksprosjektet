@@ -90,7 +90,7 @@ st.sidebar.header('Periode i år')
 st.sidebar.markdown('Se på trender fra første til siste år')
 period_slider = st.sidebar.slider(
     '',
-    1900, 2020, (1950, 2000)
+    1900, 2020, (1900, 2010)
 )
 
 st.sidebar.header('Visning')
