@@ -149,8 +149,8 @@ axb.spines["right"].set_visible(False)
 
 axb.spines["bottom"].set_color("grey")
 axb.spines["left"].set_color("grey")
-axb.spines["bottom"].set_linewidth(3)
-axb.spines["left"].set_linewidth(3)
+axb.spines["bottom"].set_linewidth(1)
+axb.spines["left"].set_linewidth(1)
 
 figfile = StringIO()
 plt.savefig(figfile, format='svg')  # rewind to beginning of file
@@ -167,8 +167,8 @@ axa.spines["right"].set_visible(False)
 
 axa.spines["bottom"].set_color("grey")
 axa.spines["left"].set_color("grey")
-axa.spines["bottom"].set_linewidth(3)
-axa.spines["left"].set_linewidth(3)
+axa.spines["bottom"].set_linewidth(1)
+axa.spines["left"].set_linewidth(1)
 
 figfile = StringIO()
 plt.savefig(figfile, format='svg')  # rewind to beginning of file
