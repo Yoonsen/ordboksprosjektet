@@ -1,8 +1,8 @@
 numpy
-pandas==1.0.1
-dhlab==0.7.5
-streamlit==0.65.2
-matplotblib
+pandas
+dhlab
+streamlit
+matplotlib
 requests
 IPython
 seaborn
