@@ -200,5 +200,5 @@ st.header('Konkordanser - midlertidig ute av drift ')
 #st.markdown('\n\n'.join([ str(j['before']) + ' _' + str(j['word']) + '_ ' + str(j['after']) \
 #            + ' $\\bullet$  [' + str(j['title']) + '](' + str(j['urn']) + '?searchText=' + konk_ord + '), ' + \
 #          j['author'] + ', ' + str(j['year']) for j in konks]
-                       ))
+#                       ))
 #st.write(konks)
