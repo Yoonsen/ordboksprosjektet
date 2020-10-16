@@ -192,7 +192,7 @@ st.write(resultat)
 
 
 # show concordances
-st.header('Konkordanser - midlertidig ute av drift ')
+st.header('Konkordanser')
 konk_ord = st.text_input('konkordanseord', list(resultat.index)[0])
 #media_type = st.radio('Mediatype', ['bok', 'avis'])
 konks = nb.concordance(konk_ord, corpus= 'bok', yearfrom = period_slider[0], yearto = period_slider[1], size = 20, kind='json')
