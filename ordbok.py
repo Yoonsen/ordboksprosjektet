@@ -193,13 +193,26 @@ st.write(resultat)
 
 # show concordances
 st.header('Konkordanser')
+media = st.selectbox('Søk i avis eller bok', ['bok', 'avis'], 0)
+ddk = st.text_input('velg ddk, skriv inn de første sifrene', '839')
+if ddk != '':
+    if '%' not in ddk:
+        ddk = ddk + "%"
+        
 konk_ord = st.text_input('konkordanseord', list(resultat.index)[0])
 #media_type = st.radio('Mediatype', ['bok', 'avis'])
-konks = nb.concordance(konk_ord, corpus= 'bok', yearfrom = period_slider[0], yearto = period_slider[1], size = 20, kind='json')
 
-st.markdown('\n\n'.join([ str(j['before']) + ' _' + str(j['word']) + '_ ' + str(j['after']) \
+konks = nb.concordance(konk_ord, corpus= media, ddk = ddk, yearfrom = period_slider[0], yearto = period_slider[1], size = 20, kind='json')
+
+if media == 'bok':
+    konk = '\n\n'.join([ str(j['before']) + ' _' + str(j['word']) + '_ ' + str(j['after']) \
            + ' $\\bullet$  [' + str(j['title']) + '](' + str(j['urn']) + '?searchText=' + konk_ord + '), ' + \
           j['author'] + ', ' + str(j['year']) for j in konks]
-                       ))
-
-#st.write(konks)
+                       )
+else:
+    konk = '\n\n'.join([ str(j['before']) + ' _' + str(j['word']) + '_ ' + str(j['after']) \
+           + ' $\\bullet$  [' + ' '.join(str(j['urn']).split('_')[2:6]) + '](' + str(j['urn']) + '?searchText=' + konk_ord + ')' for j in konks])
+    
+ 
+    
+st.write(konk)
