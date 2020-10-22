@@ -193,16 +193,21 @@ st.write(resultat)
 
 # show concordances
 st.header('Konkordanser')
-media = st.selectbox('Søk i avis eller bok', ['bok', 'avis'], 0)
-ddk = st.text_input('velg ddk, skriv inn de første sifrene', '839')
-if ddk != '':
-    if '%' not in ddk:
-        ddk = ddk + "%"
+media = st.selectbox('Søk i avis eller bok', ['bok', 'avis', 'ordbok'], 0)
+#ddk = st.text_input('velg ddk, skriv inn de første sifrene', '839')
+if media == 'ordbok':
+    ddk = ["610%","423%", "491%", "620%", "433%", "443%", "439%"]
+    media = 'bok'
+else:
+    ddk = None;
         
 konk_ord = st.text_input('konkordanseord', list(resultat.index)[0])
 #media_type = st.radio('Mediatype', ['bok', 'avis'])
 
-konks = nb.concordance(konk_ord, corpus= media, ddk = ddk, yearfrom = period_slider[0], yearto = period_slider[1], size = 20, kind='json')
+if ddk != None:
+    konks = [k for konks in [nb.concordance(konk_ord, corpus = 'bok', ddk = dewey, yearfrom = period_slider[0], yearto = period_slider[1], size = 10, kind='json') for dewey in ddk] for k in konks]
+else:
+     konks = nb.concordance(konk_ord, corpus= media, yearfrom = period_slider[0], yearto = period_slider[1], size = 20, kind='json')
 
 if media == 'bok':
     konk = '\n\n'.join([ str(j['before']) + ' _' + str(j['word']) + '_ ' + str(j['after']) \
