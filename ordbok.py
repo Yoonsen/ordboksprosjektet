@@ -85,7 +85,7 @@ else:
     resultat = wildcard(word = word, faktor = faktor, frekvens = frekvens, antall = limit)
 
 st.sidebar.header('Relativisering')
-st.sidebar.markdown('Relativiser til summen av et sett ord, standard er punktum og komma, som gir tall ti ganger relativfreksensen. Sett inn ord adskilt med komma, for å få med komma, skrive to eller fler komma etter hverandre, eller avslutt med komma')
+st.sidebar.markdown('Relativiser til summen av et sett ord, standard er punktum og komma. Det gir et tall som er ca. ti ganger høyere enn relativfreksensen. Sett inn ord adskilt med komma, for å få med komma, skrive to eller fler komma etter hverandre, eller avslutt med komma')
 sammenlign = st.sidebar.text_input("", ".,")
 
 st.sidebar.header('Periode i år')
