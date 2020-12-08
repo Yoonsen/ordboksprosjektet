@@ -21,7 +21,7 @@ def sumword(words, period, media = 'bok'):
     if '' in wordlist:
         wordlist = [','] + [y for y in wordlist if y != '']
     ref = pd.concat([nb.unigram(w, media = media, period = period) for w in wordlist], axis = 1).sum(axis = 1)
-    ref.columns = ["tot"]
+    ref.index = pd.to_datetime(ref.index, format='%Y')
     return ref
 
 
@@ -39,20 +39,29 @@ def wildcard(word = 'frum*', faktor = 2, frekvens = 50, antall = 50):
 
 
 @st.cache(suppress_st_warning = True, show_spinner = False)
-def ngbok(x, period, ddk = None):
+def ngbok(word, period, ddk = None):
     try:
-        r = nb.frame(nb.unigram(x, period, media='bok', ddk=ddk), x)
+        if " " in word:
+            bigram = word.split()[:2]
+            res = nb.frame(nb.bigram(first = bigram [0], second = bigram [1], ddk=ddk, period = period, media = 'bok'), word)
+        else:
+            res = nb.frame(nb.unigram(word, period = period, ddk = ddk, media = 'bok'), word)
     except:
-        r = pd.DataFrame()
-    return r
+        res = pd.DataFrame()
+    return res
 
 @st.cache(suppress_st_warning = True, show_spinner = False)
-def ngavis(x, period):
+def ngavis(word, period):
     try:
-        r = nb.frame(nb.unigram(x, period, media='avis'), x)
+        if " " in word:
+            bigram = word.split()[:2]
+            res = nb.frame(nb.bigram(first = bigram [0], second = bigram [1], period = period, media = 'avis'), word)
+        else:
+            res = nb.frame(nb.unigram(word, period = period, media = 'avis'), word)
+        #st.write(res.head())
     except:
-        r = pd.DataFrame()
-    return r
+        res = pd.DataFrame()
+    return res
 
 # App code
 
@@ -63,7 +72,8 @@ st.markdown('Se mer om å drive analytisk DH på [DHLAB-siden](https://nbviewer.
 
 st.title('Ordsøk for revisjonsprosjektet')
 
-word = st.text_input('Fyll in ett ord med jokertegnet *, eller flere ord skilt med komma. Om bare ett ord er fylt inn søkes det i paradigmet for ordet, for alle former i alle passende paradigmer. Søket skiller mellom store og små bo', "frum*")
+word = st.text_input('Fyll in ett ord med jokertegnet *, eller en kommaseparert liste av enkeltord eller bigrammer. Om bare ett ord er fylt inn søkes det i paradigmet for ordet, for alle former i alle passende paradigmer. Søket skiller mellom store og små bokstaver', "frum*")
+
 
 st.sidebar.header('Parametre for jokertegnsøk')
 faktor = st.sidebar.number_input('Forskjell i ordlengde', min_value = 0, value = 2)
@@ -72,6 +82,7 @@ limit = st.sidebar.number_input('Antall treff', min_value = 5, value = 10)
 
 using_wildcard = True
 
+# check if there are several words, using comma, or one word with a *
 if ',' in word and not '*' in word:
     words = [w.strip() for w in word.split(',')]
     if '' in words:
@@ -83,6 +94,8 @@ elif not ',' in word and not '*' in word:
     resultat = pd.DataFrame(list(set([word] + [x for y in nb.word_paradigm(word) for x in y[1]]))).set_index(0) 
 else:
     resultat = wildcard(word = word, faktor = faktor, frekvens = frekvens, antall = limit)
+
+#### Parameters in sidebar ##############
 
 st.sidebar.header('Relativisering')
 st.sidebar.markdown('Relativiser til summen av et sett ord, standard er punktum og komma. Det gir et tall som er ca. ti ganger høyere enn relativfreksensen. Sett inn ord adskilt med komma, for å få med komma, skrive to eller fler komma etter hverandre, eller avslutt med komma')
@@ -100,34 +113,41 @@ st.sidebar.markdown('Grafen glattes til gjennomsnittsverdien av årene foran og 
 smooth_slider = st.sidebar.slider('', 1, 8, 3)
 
 
+##### Computations
 
-dfb = pd.concat([ngbok(x, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1)
-dfa = pd.concat([ngavis(x, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1)
+dfb = pd.concat([ngbok(x, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1).fillna(0)
+dfa = pd.concat([ngavis(x, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1).fillna(0)
 
 # update result
 # if not using wildcard
 
-#if not using_wildcard:
-r0 = dfb.sum(axis=0).transpose()
+############# Add summary panel ############################
+
+r0 = dfb.sum(axis = 0).transpose()
 r1 = dfa.sum(axis = 0).transpose()
+
+
 ddk = pd.concat([ngbok(x, ddk = '4%', period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1).sum(axis = 0).transpose()
+
 resultat = pd.concat([r0, r1, ddk], axis = 1).fillna(0)
+
 resultat.columns = ['bok', 'avis', 'ddk4']
     
-
-
-# Råfrekvenser unigram
-if sammenlign != "":
-    totb = sumword(sammenlign, period=(period_slider[0], period_slider[1]))
-    tota = sumword(sammenlign, media = 'avis', period=(period_slider[0], period_slider[1]))
-    for x in dfb:
-        dfb[x] = dfb[x]/totb
-    for x in dfa:
-        dfa[x] = dfa[x]/tota
-
-        
 dfb.index = pd.to_datetime(dfb.index, format='%Y')
 dfa.index = pd.to_datetime(dfa.index, format='%Y')
+
+# Råfrekvenser ngram
+
+if sammenlign != "":
+    totb = sumword(sammenlign, media = 'bok', period=(period_slider[0], period_slider[1]))
+    tota = sumword(sammenlign, media = 'avis', period=(period_slider[0], period_slider[1]))
+    for x in dfb:
+        dfb[x] = dfb[x]*100/totb
+    for x in dfa:
+        dfa[x] = dfa[x]*100/totb
+
+
+        
 
 
 dfb = dfb.rolling(window= smooth_slider).mean()
