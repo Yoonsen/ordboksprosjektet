@@ -3,24 +3,25 @@ import dhlab.nbtext as nb
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import StringIO, BytesIO
+import wordbank as wb
 from PIL import Image
 
 @st.cache(suppress_st_warning=True, show_spinner = False)
-def ngram(wordex, period, ddk = None):
+def ngram(wordex, period, ddk = None, lang = 'nob'):
     if " " in word:
         bigram = word.split()[:2]
-        res = nb.bigram(first = bigram [0], second = bigram [1], ddk=ddk, period = period)
+        res = nb.bigram(first = bigram [0], second = bigram [1], ddk=ddk, period = period, lang=lang)
     else:
-        res = nb.unigram(word, period = period, ddk=ddk)
+        res = nb.unigram(word, period = period, ddk=ddk, lang=lang)
     return res
 
 @st.cache(suppress_st_warning=True, show_spinner = False)
-def sumword(words, period, media = 'bok'):
+def sumword(words, period, media = 'bok', lang='nob'):
     wordlist =   [x.strip() for x in words.split(',')]
     # check if trailing comma, or comma in succession, if so count comma in
     if '' in wordlist:
         wordlist = [','] + [y for y in wordlist if y != '']
-    ref = pd.concat([nb.unigram(w, media = media, period = period) for w in wordlist], axis = 1).sum(axis = 1)
+    ref = pd.concat([nb.unigram(w, media = media, period = period, lang=lang) for w in wordlist], axis = 1).sum(axis = 1)
     ref.index = pd.to_datetime(ref.index, format='%Y')
     return ref
 
@@ -39,13 +40,13 @@ def wildcard(word = 'frum*', faktor = 2, frekvens = 50, antall = 50):
 
 
 @st.cache(suppress_st_warning = True, show_spinner = False)
-def ngbok(word, period, ddk = None):
+def ngbok(word, period, ddk = None, lang='nob'):
     try:
         if " " in word:
             bigram = word.split()[:2]
-            res = nb.frame(nb.bigram(first = bigram [0], second = bigram [1], ddk=ddk, period = period, media = 'bok'), word)
+            res = nb.frame(nb.bigram(first = bigram [0], second = bigram [1], ddk=ddk, period = period, media = 'bok', lang=lang), word)
         else:
-            res = nb.frame(nb.unigram(word, period = period, ddk = ddk, media = 'bok'), word)
+            res = nb.frame(nb.unigram(word, period = period, ddk = ddk, media = 'bok', lang=lang), word)
     except:
         res = pd.DataFrame()
     return res
@@ -74,6 +75,7 @@ st.title('Ordsøk for revisjonsprosjektet')
 
 word = st.text_input('Fyll in ett ord med jokertegnet *, eller en kommaseparert liste av enkeltord eller bigrammer. Om bare ett ord er fylt inn søkes det i paradigmet for ordet, for alle former i alle passende paradigmer. Søket skiller mellom store og små bokstaver', "frum*")
 
+lang = st.radio('målform', ['nob', 'nno'], index=0)
 
 st.sidebar.header('Parametre for jokertegnsøk')
 faktor = st.sidebar.number_input('Forskjell i ordlengde', min_value = 0, value = 2)
@@ -91,7 +93,7 @@ if ',' in word and not '*' in word:
     using_wildcard = False
 elif not ',' in word and not '*' in word:
     using_wildcard = False
-    resultat = pd.DataFrame(list(set([word] + [x for y in nb.word_paradigm(word) for x in y[1]]))).set_index(0) 
+    resultat = pd.DataFrame(list(set([word] + [x for y in wb.word_paradigm(word, lang=lang) for x in y[1]]))).set_index(0) 
 else:
     resultat = wildcard(word = word, faktor = faktor, frekvens = frekvens, antall = limit)
 
@@ -115,7 +117,7 @@ smooth_slider = st.sidebar.slider('', 1, 8, 3)
 
 ##### Computations
 
-dfb = pd.concat([ngbok(x, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1).fillna(0)
+dfb = pd.concat([ngbok(x, lang=lang, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1).fillna(0)
 dfa = pd.concat([ngavis(x, period=(period_slider[0], period_slider[1]))  for x in resultat.index], axis = 1).fillna(0)
 
 # update result
@@ -227,7 +229,7 @@ konk_ord = st.text_input('konkordanseord', list(resultat.index)[0])
 if ddk != None:
     konks = [k for konks in [nb.concordance(konk_ord, corpus = 'bok', ddk = dewey, yearfrom = period_slider[0], yearto = period_slider[1], size = 10, kind='json') for dewey in ddk] for k in konks]
 else:
-     konks = nb.concordance(konk_ord, corpus= media, yearfrom = period_slider[0], yearto = period_slider[1], size = 20, kind='json')
+     konks = nb.concordance(konk_ord, corpus = media, yearfrom = period_slider[0], yearto = period_slider[1],size = 20, kind='json')
 
 if media == 'bok':
     konk = '\n\n'.join([ str(j['before']) + ' _' + str(j['word']) + '_ ' + str(j['after']) \
